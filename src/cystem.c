@@ -1,13 +1,15 @@
+#include "cli.h"
 #include <stdio.h>
 
 int main(int argsc, char **argsv) {
   if (argsc < 2) {
-    perror("Missing argumensts\n");
+    perror("Missing arguments\n");
     return 1;
   }
 
-  for (int i = 0; argsv[i]; i++)
-    printf("%s\n", argsv[i]);
+  printf("%s\n", argsv[1]);
+
+  HandleCLI(argsc, argsv);
 
   return 0;
 }
