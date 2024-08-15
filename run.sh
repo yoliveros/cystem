@@ -1,12 +1,11 @@
 #!/bin/bash
 
-p_name="cystem"
+exec="cm"
 
 if [[ $1 == "dist" ]]; then
   make dist
-  ./dist/$p_name
 else
   make
-  ./dev/$p_name $1
+  ./dev/$exec $1 $2
 fi
 

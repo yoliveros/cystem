@@ -7,8 +7,6 @@ int main(int argsc, char **argsv) {
     return 1;
   }
 
-  printf("%s\n", argsv[1]);
-
   HandleCLI(argsc, argsv);
 
   return 0;

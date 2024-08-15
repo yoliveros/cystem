@@ -17,4 +17,4 @@ dist: $(files)
 	$(CC) $(files) -o dist/$(exec) $(dist_flg)
 
 clean: 
-	@rm -rf dev dist
+	@rm -rf dev dist test
