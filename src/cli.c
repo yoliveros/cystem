@@ -2,6 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+// General flags
+#define GFLAGS "-Wall -Werror -Wextra -pedantic -std=17"
+
+// Dev flags
+#define DFLAGS "-g " GFLAGS
+
+// Prod flags
+#define PFLAGS "-O2 " GFLAGS
+
 void create_project(char *p_name) {
 
   char name[32];
@@ -30,15 +39,40 @@ void create_project(char *p_name) {
   fputs(main_file, new_file);
 
   fclose(new_file);
+}
 
-  exit(EXIT_SUCCESS);
+typedef enum {
+  DEV,
+  PROD,
+} Build;
+
+void build_project(Build build) {
+  if (build == DEV)
+    system(DFLAGS);
+
+  system(PFLAGS);
+}
+
+void run_project(Build build) {
+  if (build == DEV) {
+    build_project(DEV);
+    system("./dev/cm");
+  }
+
+  build_project(PROD);
+  system("./dist/cm");
+}
+
+void clean() {
+  system("rm -rf dev");
+  system("rm -rf dist");
 }
 
 void HandleCLI(int arsgc, char **arsgv) {
   char first[32];
   sprintf(first, "%s", arsgv[1]);
 
-  if (strcmp(first, "-n") || strcmp(first, "-new")) {
+  if (strcmp(first, "n") == 0 || strcmp(first, "new") == 0) {
     if (arsgc < 3) {
       char err[64];
       sprintf(err, "Missing name for %s", first);
@@ -47,5 +81,16 @@ void HandleCLI(int arsgc, char **arsgv) {
     }
 
     create_project(arsgv[2]);
+  } else if (strcmp(first, "r") == 0 || strcmp(first, "run") == 0) {
+    if (arsgc == 3 && strcmp(arsgv[2], "prod") == 0) {
+      run_project(PROD);
+      return;
+    }
+
+    run_project(DEV);
+  } else if (strcmp(first, "c") == 0 || strcmp(first, "clean") == 0) {
+    clean();
+  } else {
+    build_project(DEV);
   }
 }

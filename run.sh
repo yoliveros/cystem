@@ -8,4 +8,3 @@ else
   make
   ./dev/$exec $1 $2
 fi
-
