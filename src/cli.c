@@ -3,10 +3,10 @@
 #include <string.h>
 
 // General flags
-#define GFLAGS "-Wall -Werror -Wextra -pedantic -std=17"
+#define GFLAGS "-std=c17"
 
 // Dev flags
-#define DFLAGS "-g " GFLAGS
+#define DFLAGS "-g -Wall -Werror -Wextra -pedantic " GFLAGS
 
 // Prod flags
 #define PFLAGS "-O2 " GFLAGS
@@ -47,16 +47,33 @@ typedef enum {
 } Build;
 
 void build_project(Build build) {
-  if (build == DEV)
-    system(DFLAGS);
+  char cc[] = "gcc";
 
-  system(PFLAGS);
+  char cmd[512];
+  system("mkdir -p out");
+  system("gcc -c src/*.c");
+  sprintf(cmd, "%s *.o -o", cc);
+  switch (build) {
+  case DEV:
+    sprintf(cmd, " dev/cm %s", DFLAGS);
+    system("mkdir -p dev");
+    strcat(cmd, DFLAGS);
+    break;
+  case PROD:
+    system("mkdir -p dist");
+    sprintf(cmd, " dist/cm %s", PFLAGS);
+    break;
+  }
+
+  system(cmd);
+  system("rm *.o");
 }
 
 void run_project(Build build) {
   if (build == DEV) {
     build_project(DEV);
     system("./dev/cm");
+    return;
   }
 
   build_project(PROD);
