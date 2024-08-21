@@ -1,3 +1,8 @@
 dev
 dist
 test
+out
+cm
+*.o
+*.exe
+*.out
