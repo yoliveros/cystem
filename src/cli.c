@@ -1,6 +1,19 @@
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+
+// Preprosesor OS check
+#if defined(_WIN64) && defined(__CYWIN__)
+#define COMPILER "MSVC"
+#elif defined(__linux__)
+#define COMPILER "GCC"
+#elif defined(__APPLE__)
+#define COMPILER "CLANG"
+#else
+#define COMPILER NULL
+#endif
 
 // General flags
 #define GFLAGS "-std=c17"
@@ -11,8 +24,20 @@
 // Prod flags
 #define PFLAGS "-O2 " GFLAGS
 
-void create_project(char *p_name) {
+#define SRC "src"
 
+void create_file(char *src, char *name, char *content) {
+  char full_src[1024];
+  sprintf(full_src, "%s/%s", src, name);
+
+  FILE *new_file = fopen(src, "w");
+
+  fputs(content, new_file);
+
+  fclose(new_file);
+}
+
+void create_project(char *p_name) {
   char name[32];
   sprintf(name, "%s", p_name);
 
@@ -25,10 +50,8 @@ void create_project(char *p_name) {
     exit(EXIT_FAILURE);
   }
 
-  char src[1024];
-  sprintf(src, "%s/src/main.c", name);
-
-  FILE *new_file = fopen(src, "w");
+  char p_route[256];
+  sprintf(p_route, "%s/src/main.c", name);
 
   char main_file[] = "#include <stdio.h>\n"
                      "\n"
@@ -36,9 +59,24 @@ void create_project(char *p_name) {
                      "  printf(\"Hello World!\");\n"
                      "  return 0;\n"
                      "}";
-  fputs(main_file, new_file);
+  create_file(SRC, "main.c", main_file);
 
-  fclose(new_file);
+  if (COMPILER == NULL) {
+    perror("OS or Compiler not supported");
+    exit(1);
+  }
+
+  char conf_file[1024];
+  sprintf(conf_file,
+          "#config file\n"
+          "\n"
+          "name: %s\n"
+          "version: 0.0.0\n"
+          "compiler: %s\n"
+          "c_version: c17",
+          p_name, COMPILER);
+
+  create_file(SRC, "cystem.conf", conf_file);
 }
 
 typedef enum {
@@ -48,6 +86,13 @@ typedef enum {
 
 void build_project(Build build) {
   char cc[] = "gcc";
+  DIR *dp;
+  struct dirent *ep;
+  dp = opendir("./");
+  if (dp != NULL) {
+    while ((ep = readdir(dp)) != NULL)
+      system("");
+  }
 
   char cmd[512];
   system("mkdir -p out");
