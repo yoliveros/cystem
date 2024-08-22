@@ -8,9 +8,9 @@
 #if defined(_WIN64) && defined(__CYWIN__)
 #define COMPILER "MSVC"
 #elif defined(__linux__)
-#define COMPILER "GCC"
+#define COMPILER "gcc"
 #elif defined(__APPLE__)
-#define COMPILER "CLANG"
+#define COMPILER "clang"
 #else
 #define COMPILER NULL
 #endif
@@ -20,11 +20,17 @@
 
 // Dev flags
 #define DFLAGS "-g -Wall -Werror -Wextra -pedantic " GFLAGS
+#define DEV_FOLDER "dev"
 
 // Prod flags
 #define PFLAGS "-O2 " GFLAGS
+#define PROD_FOLDER "dist"
 
+// source folder
 #define SRC "src"
+
+// EXE name
+#define EXE "cm"
 
 void create_file(char *src, char *name, char *content) {
   char full_src[1024];
@@ -46,7 +52,7 @@ void create_project(char *p_name) {
 
   int t = system(cmd);
   if (t == -1) {
-    printf("Folder name already exists");
+    printf("Project name already taken");
     exit(EXIT_FAILURE);
   }
 
@@ -85,33 +91,25 @@ typedef enum {
 } Build;
 
 void build_project(Build build) {
-  char cc[] = "gcc";
-  DIR *dp;
-  struct dirent *ep;
-  dp = opendir("./");
-  if (dp != NULL) {
-    while ((ep = readdir(dp)) != NULL)
-      system("");
-  }
+  char build_cmd[512];
+  char folder_cmd[64];
+  char mkdir[] = "mkdir -p";
 
-  char cmd[512];
-  system("mkdir -p out");
-  system("gcc -c src/*.c");
-  sprintf(cmd, "%s *.o -o", cc);
   switch (build) {
   case DEV:
-    sprintf(cmd, " dev/cm %s", DFLAGS);
-    system("mkdir -p dev");
-    strcat(cmd, DFLAGS);
+    sprintf(folder_cmd, "%s %s", mkdir, DEV_FOLDER);
+    sprintf(build_cmd, "%s %s/*.c -o %s/%s %s", COMPILER, SRC, DEV_FOLDER, EXE,
+            DFLAGS);
     break;
   case PROD:
-    system("mkdir -p dist");
-    sprintf(cmd, " dist/cm %s", PFLAGS);
+    sprintf(folder_cmd, "%s %s", mkdir, PROD_FOLDER);
+    sprintf(build_cmd, "%s %s/*.c -o %s/%s %s", COMPILER, SRC, PROD_FOLDER, EXE,
+            DFLAGS);
     break;
   }
 
-  system(cmd);
-  system("rm *.o");
+  system(folder_cmd);
+  system(build_cmd);
 }
 
 void run_project(Build build) {
